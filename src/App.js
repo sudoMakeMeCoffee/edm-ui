@@ -1,24 +1,58 @@
-import logo from './logo.svg';
-import './App.css';
-
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import Home from "./pages/Home";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import "./App.css";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Navbar from "./components/Navbar";
+import CreateEvent from "./pages/CreateEvent";
 function App() {
+  const location = useLocation();
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/auth/check-auth", {
+        withCredentials: true,
+      })
+      .then(() => {
+        // ✅ Authenticated
+        setIsAuthenticated(true);
+      })
+      .catch(() => {
+        setIsAuthenticated(false);
+      });
+  }, []);
+
+
+  // Define routes where you DON'T want the Navbar
+  const hideNavbarRoutes = ["/signin", "/signup"];
+  const hideNavbar = hideNavbarRoutes.includes(location.pathname);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+
+    <>
+      {!hideNavbar && <Navbar isAuthenticated={isAuthenticated}/>}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route
+          path="/signup"
+          element={isAuthenticated ? <Navigate to={"/"} /> : <SignUp />}
+        />
+        <Route
+          path="/signin"
+          element={isAuthenticated ? <Navigate to={"/"} /> : <SignIn />}
+        />
+        <Route path="/event/create" element={<CreateEvent/>}/>
+      </Routes>
+    </>
   );
 }
 
