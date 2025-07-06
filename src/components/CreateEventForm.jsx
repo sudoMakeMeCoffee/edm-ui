@@ -1,54 +1,83 @@
+import axios from "axios";
 import React, { useRef, useState } from "react";
 
 const CreateEventForm = () => {
-  const [title, setTitle] = useState("");
-  const [price, setPrice] = useState(0);
-  const [venue, setVenue] = useState("");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef();
+
+  const [formData, setFormData] = useState({
+    title: "",
+    price: 0,
+    venue: "",
+    date: "",
+    description: "",
+    timeFrom: "",
+    timeTo: "",
+    image: null,
+  });
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]: files ? files[0] : value,
+    });
+  };
 
   const handleClick = () => {
     fileInputRef.current.click();
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData();
 
-    console.log({
-      title,
-      venue,
-      price,
-      description,
-      date,
-      from,
-      to
-    })
+    data.append("title", formData.title);
+    data.append("price", formData.price);
+    data.append("venue", formData.venue);
+    data.append("date", formData.date);
+    data.append("description", formData.description);
+    data.append("timeFrom", formData.timeFrom);
+    data.append("timeTo", formData.timeTo);
+    data.append("image", formData.image);
 
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/api/organizer/event",
+        data,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+        }
+      );
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
-    <form className="flex flex-col gap-4" onSubmit={(e) => handleSubmit(e)}>
-      <div className="flex items-center gap-3">
-        <div className="flex flex-row items-center border rounded-xl px-5 py-3">
+    <form
+      className="flex flex-col gap-4 w-full"
+      encType="multipart/form-data"
+      onSubmit={handleSubmit}
+    >
+      <div className="flex items-center gap-3 ">
+        <div className="flex flex-row items-center border rounded-xl px-5 py-3 w-full">
           <input
             type="text"
             placeholder="Title"
             name="title"
-            onChange={(e) => setTitle(e.target.value)}
-            value={title}
+            onChange={handleChange}
             required
           />
         </div>
-        <div className="flex flex-row items-center border rounded-xl px-5 py-3">
+        <div className="flex flex-row items-center border rounded-xl px-5 py-3 w-full">
           <input
             type="number"
             placeholder="Price"
             name="price"
             required
-            onChange={(e) => setPrice(e.target.value)}
-            value={price}
+            onChange={handleChange}
           />
         </div>
       </div>
@@ -60,26 +89,21 @@ const CreateEventForm = () => {
             placeholder="Venue"
             name="venue"
             required
-            onChange={(e) => setVenue(e.target.value)}
-            value={venue}
+            onChange={handleChange}
           />
         </div>
         <div className="flex flex-row items-center border rounded-xl px-5 py-3 w-full">
-          <input
-            type="date"
-            name="date"
-            id=""
-            onChange={(e) => setDate(e.target.value)}
-            value={date}
-          />
+          <input type="date" name="date" id="" onChange={handleChange} />
         </div>
       </div>
 
       <div className="flex flex-row items-center border rounded-xl px-5 py-3 gap-2">
         <input
           type="file"
+          name="image"
           accept="image/png, image/jpeg, image/jpg"
           className="hidden"
+          onChange={handleChange}
           ref={fileInputRef}
         />
         <button
@@ -89,7 +113,7 @@ const CreateEventForm = () => {
           Upload Image
         </button>
         <p className="text-sm text-gray-500 mt-2">
-          Accepted formats: .jpg, .jpeg, .png
+          Event Poster: .jpg, .jpeg, .png
         </p>
       </div>
 
@@ -100,20 +124,29 @@ const CreateEventForm = () => {
         className="border rounded-xl px-5 py-3"
         rows={5}
         required
-        onChange={(e) => setDescription(e.target.value)}
-        value={description}
+        onChange={handleChange}
       ></textarea>
 
       <div className="flex gap-2">
         <div className="flex flex-row gap-3 items-center border rounded-xl px-5 py-3 w-full">
           <span>From</span>
-          <input type="time" name="from" id="" className="" onChange={(e) => setFrom(e.target.value)}
-              value={from}/>
+          <input
+            type="time"
+            name="timeFrom"
+            id=""
+            className=""
+            onChange={handleChange}
+          />
         </div>
         <div className="flex flex-row gap-3 items-center border rounded-xl px-5 py-3 w-full">
           <span>To</span>
-          <input type="time" name="to" id="" className="" onChange={(e) => setTo(e.target.value)}
-              value={to}/>
+          <input
+            type="time"
+            name="timeTo"
+            id=""
+            className=""
+            onChange={handleChange}
+          />
         </div>
       </div>
 

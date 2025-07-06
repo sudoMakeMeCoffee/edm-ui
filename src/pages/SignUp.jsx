@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { FaEye } from "react-icons/fa6";
 import { GoEye, GoEyeClosed } from "react-icons/go";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -18,17 +19,18 @@ const SignUp = () => {
   const signUp = async () => {
     try {
       setIsLoading(true);
-      await axios.post("http://localhost:8080/api/auth/signup", {
+      const res = await axios.post("http://localhost:8080/api/auth/signup", {
         username: username,
         email: email,
         password: password,
         role: "USER",
       });
       setIsLoading(false);
-      navigate("/signin");
+      toast.success(res.data.message)
+      navigate("/signin")
     } catch (error) {
       setIsLoading(false);
-      setErr(error.response.data.message);
+      toast.error(error.response?.data?.message)
     }
   };
 
@@ -52,11 +54,10 @@ const SignUp = () => {
 
   return (
     <div className="flex flex-col gap-4 items-center justify-center h-screen">
-      <div className="flex items-center gap-3 flex-col">
+      <div className="flex items-center flex-col">
         <h1 className="text-3xl font-bold">
           Sign Up to <span id="logo">EDM</span>
         </h1>
-        <span className="text-sm text-red-500">{err}</span>
       </div>
 
       <form className="flex flex-col gap-4" onSubmit={(e) => handleSubmit(e)}>
@@ -135,7 +136,8 @@ const SignUp = () => {
           className="px-5 py-3 rounded-xl bg-black text-white border border-grey"
           disabled={isLoading}
         >
-          {isLoading ? "Loading..." : "SignUp"}
+          {isLoading &&  <svg class="mr-3 size-5 animate-spin ..." viewBox="0 0 24 24"> </svg>}
+          Sigun Up
         </button>
 
         <span className="text-center text-sm">

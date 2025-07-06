@@ -3,8 +3,12 @@ import React, { useEffect, useState } from "react";
 import { FaEye } from "react-icons/fa6";
 import { GoEye, GoEyeClosed } from "react-icons/go";
 import { Link, useNavigate } from "react-router-dom";
+import useAuthStore from "../store/AuthStore";
+import { toast } from "react-toastify";
 
 const SignIn = () => {
+  const { isAuthenticated, setIsAuthenticated, user, setUser } = useAuthStore();
+
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,7 +19,7 @@ const SignIn = () => {
   const signIn = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.post(
+      const res = await axios.post(
         "http://localhost:8080/api/auth/signin",
         {
           email: email,
@@ -26,11 +30,14 @@ const SignIn = () => {
         }
       );
       setIsLoading(false);
+      setIsAuthenticated(true)
+      setUser(res.data.data)
+      toast.success(res.data.message)
       navigate("/");
     } catch (error) {
-      console.log(error)
+      console.log(error);
       setIsLoading(false);
-      setErr(error.response.data.message);
+      setErr(error.response?.data?.message);
     }
   };
 
